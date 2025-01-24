@@ -13,6 +13,7 @@ const Home = () => {
   const [userCreateEmail, setUserCreateEmail] = useState("")
   const [userCreatePassword, setUserCreatePassword] = useState("")
 
+  const [currentNoteName, setCurrentNoteName] = useState("")
   const [currentNoteId, setCurrentNoteId] = useState("")
   const [currentNoteContents, setCurrentNotesContents] = useState("")
   const [showEditor, setShowEditor] = useState(false)
@@ -39,13 +40,29 @@ const Home = () => {
     setCurrentNotesContents(note.content);
     setShowEditor(true);
     setCurrentNoteId(note.id)
+    setCurrentNoteName(note.name)
+  }
+
+  function handleForceCloseEditor() {
+    setShowEditor(false);
+    setCurrentNoteId("")
+    setCurrentNotesContents("")
+    setCurrentNoteName("")
   }
 
   return (
     <>
       {/* top bar displaying basic info */}
       <div className="flex flex-row gap-3 justify-between border-2 border-black">
-        <div className="">{isUserLoggedIn ? `You are logged in as: ${user.record.name}` : "You are not logged in!"}</div>
+        <div className="">{isUserLoggedIn ?
+          (
+            <div className="">
+              <div className="font-bold text-xl">Logged in as: {user.record.name}</div>
+              <div className="italic">{currentNoteName && `Editing: ${currentNoteName}`}</div>
+            </div>
+          )
+
+          : "You are not logged in!"}</div>
         {!isUserLoggedIn && (
           <div className="grid grid-rows-4">
             <div className="font-bold text-xl">Login</div>
@@ -63,6 +80,12 @@ const Home = () => {
             <div className="btn" onClick={handleCreateAccount}>Create Account</div>
           </div>
         )}
+        {showEditor && (
+          <>
+            <div className="btn btn-success">Save</div>
+            <div className="btn btn-error" onClick={handleForceCloseEditor}>Close</div>
+          </>
+        )}
         {isUserLoggedIn ? <div className="btn" onClick={logout}>Logout</div> : ""}
       </div>
 
@@ -70,7 +93,7 @@ const Home = () => {
       {isUserLoggedIn && (
         <div className="">
           {showEditor && (
-            <div className="container">
+            <div className="">
               <MDEditor
                 value={currentNoteContents}
                 onChange={setCurrentNotesContents}
@@ -78,13 +101,13 @@ const Home = () => {
               {/* <MDEditor.Markdown source={currentNoteContents} style={{ whiteSpace: 'pre-wrap' }} /> */}
             </div>
           )}
-          <div className="">
-            <div className="flex flex-col justify-between">
+          <div className="mt-5">
+            <div className="flex flex-row justify-between">
               <div className="">
                 {allNotesList?.length > 0 ? (
                   allNotesList.map((note) => (
                     <div key={note.id} className="flex flex-row gap-3">
-                      <div className="text-lg">{note.name}</div>
+                      <div className={`text-lg ${note.id === currentNoteId && "font-bold"}`}>{note.name}</div>
                       <div className="btn btn-sm btn-info" onClick={() => handleNoteClick(note)}>Edit</div>
                       <div className="btn btn-sm btn-error" onClick={() => deleteNote(note.id)}>Delete</div>
                     </div>
@@ -92,6 +115,11 @@ const Home = () => {
                 ) : (
                   <div className="">No notes found</div>
                 )}
+              </div>
+              <div className="border-2 border-black p-3 flex flex-col">
+                <div className="text-xl font-bold">New Note</div>
+                <input type="text" className="input" placeholder="new note name" />
+                <div className="btn">Create</div>
               </div>
             </div>
           </div>
