@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { user, isUserLoggedIn, login, logout, createAccount, getAllNotes } from "../lib/pocketbase"
+import { user, isUserLoggedIn, login, logout, createAccount, getAllNotes, deleteNote } from "../lib/pocketbase"
 import MDEditor from '@uiw/react-md-editor';
+import { useFetchPocketbase } from "../hooks/useFetchPocketbase";
 
 
 const Home = () => {
@@ -12,21 +13,18 @@ const Home = () => {
   const [userCreateEmail, setUserCreateEmail] = useState("")
   const [userCreatePassword, setUserCreatePassword] = useState("")
 
+  const [currentNoteId, setCurrentNoteId] = useState("")
   const [currentNoteContents, setCurrentNotesContents] = useState("")
   const [showEditor, setShowEditor] = useState(false)
+
+  const { data: allNotesList } = useFetchPocketbase(getAllNotes);
+
+  console.log(allNotesList)
+
 
   useEffect(() => {
     document.title = `Notes app`
   })
-
-  useEffect(() => {
-    if (!isUserLoggedIn) {
-      return
-    }
-    const records = getAllNotes()
-    console.log(records)
-    console.log("User is logged in")
-  }, [])
 
   function handleLogin() {
     login(userEmail, userPassword)
@@ -37,13 +35,11 @@ const Home = () => {
     createAccount(userCreateName, userCreateEmail, userCreatePassword)
   }
 
-  const source = `
-## MarkdownPreview
-
-## Header 2
-
-### Header 3
-`;
+  function handleNoteClick(note) {
+    setCurrentNotesContents(note.content);
+    setShowEditor(true);
+    setCurrentNoteId(note.id)
+  }
 
   return (
     <>
@@ -85,7 +81,17 @@ const Home = () => {
           <div className="">
             <div className="flex flex-col justify-between">
               <div className="">
-                { }
+                {allNotesList?.length > 0 ? (
+                  allNotesList.map((note) => (
+                    <div key={note.id} className="flex flex-row gap-3">
+                      <div className="text-lg">{note.name}</div>
+                      <div className="btn btn-sm btn-info" onClick={() => handleNoteClick(note)}>Edit</div>
+                      <div className="btn btn-sm btn-error" onClick={() => deleteNote(note.id)}>Delete</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="">No notes found</div>
+                )}
               </div>
             </div>
           </div>

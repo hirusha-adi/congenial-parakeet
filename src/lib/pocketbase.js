@@ -39,6 +39,18 @@ export async function createAccount(name, email, password) {
 }
 
 export async function getAllNotes() {
+  if (!isUserLoggedIn) {
+    return
+  }
   const records = await pb.collection('viraj_todo').getFullList();
   return records
+}
+
+
+export async function deleteNote(id) {
+  if (!isUserLoggedIn) {
+    return
+  }
+  await pb.collection('viraj_todo').delete(id);
+  window.location.reload();
 }
