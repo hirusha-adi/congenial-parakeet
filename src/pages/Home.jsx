@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { user, isUserLoggedIn, login, logout, createAccount, getAllNotes, deleteNote } from "../lib/pocketbase"
+import { user, isUserLoggedIn, login, logout, createAccount, getAllNotes, deleteNote, updateNote, addNote } from "../lib/pocketbase"
 import MDEditor from '@uiw/react-md-editor';
 import { useFetchPocketbase } from "../hooks/useFetchPocketbase";
+
 
 
 const Home = () => {
@@ -18,9 +19,9 @@ const Home = () => {
   const [currentNoteContents, setCurrentNotesContents] = useState("")
   const [showEditor, setShowEditor] = useState(false)
 
-  const { data: allNotesList } = useFetchPocketbase(getAllNotes);
+  const [makeNewNoteName, setMakeNewNoteName] = useState("")
 
-  console.log(allNotesList)
+  const { data: allNotesList } = useFetchPocketbase(getAllNotes);
 
 
   useEffect(() => {
@@ -50,6 +51,14 @@ const Home = () => {
     setCurrentNoteName("")
   }
 
+  function handleSave() {
+    updateNote(currentNoteId, currentNoteName, currentNoteContents)
+  }
+
+  function createNewNote() {
+    addNote(makeNewNoteName, "### New Note!")
+  }
+
   return (
     <>
       {/* top bar displaying basic info */}
@@ -58,7 +67,10 @@ const Home = () => {
           (
             <div className="">
               <div className="font-bold text-xl">Logged in as: {user.record.name}</div>
-              <div className="italic">{currentNoteName && `Editing: ${currentNoteName}`}</div>
+              <div className="italic">
+                Note:
+                <input type="text" className="input input-sm input-bordered ml-2" value={currentNoteName} onChange={(e) => setCurrentNoteName(e.target.value)} />
+              </div>
             </div>
           )
 
@@ -82,7 +94,7 @@ const Home = () => {
         )}
         {showEditor && (
           <>
-            <div className="btn btn-success">Save</div>
+            <div className="btn btn-success" onClick={handleSave}>Save</div>
             <div className="btn btn-error" onClick={handleForceCloseEditor}>Close</div>
           </>
         )}
@@ -93,7 +105,7 @@ const Home = () => {
       {isUserLoggedIn && (
         <div className="">
           {showEditor && (
-            <div className="">
+            <div className="mt-3">
               <MDEditor
                 value={currentNoteContents}
                 onChange={setCurrentNotesContents}
@@ -118,8 +130,8 @@ const Home = () => {
               </div>
               <div className="border-2 border-black p-3 flex flex-col">
                 <div className="text-xl font-bold">New Note</div>
-                <input type="text" className="input" placeholder="new note name" />
-                <div className="btn">Create</div>
+                <input type="text" className="input input-bordered" placeholder="new note name" value={makeNewNoteName} onChange={(e) => setMakeNewNoteName(e.target.value)} />
+                <div className="btn" onClick={createNewNote}>Create</div>
               </div>
             </div>
           </div>

@@ -54,3 +54,28 @@ export async function deleteNote(id) {
   await pb.collection('viraj_todo').delete(id);
   window.location.reload();
 }
+
+export async function updateNote(id, name, content) {
+  if (!isUserLoggedIn) {
+    return
+  }
+  const data = {
+    "name": name,
+    "content": content
+  };
+  await pb.collection('viraj_todo').update(id, data);
+  window.location.reload();
+}
+
+export async function addNote(name, content) {
+  if (!isUserLoggedIn) {
+    return
+  }
+  const data = {
+    "userId": user.record.id,
+    "name": name,
+    "content": content
+  };
+  await pb.collection('viraj_todo').create(data);
+  window.location.reload();
+}
