@@ -1,16 +1,19 @@
 import { useEffect } from "react";
+import { user, isUserLoggedIn } from "../lib/pocketbase"
 
 const Home = () => {
 
-    useEffect(() => {
-        document.title = `Home`
-    })
+  useEffect(() => {
+    document.title = `Home`
+  })
 
-    return (
-        <>
-            <h1>Home</h1>
-        </>
-    );
+  return (
+    <>
+      <div className="grid grid-cols-3 border-2">
+        <div className=""></div>
+      </div>
+    </>
+  );
 };
 
 export { Home }
