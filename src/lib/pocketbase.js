@@ -19,5 +19,21 @@ export async function login(username, password) {
 
 export async function logout() {
   pb.authStore.clear();
+  window.location.reload();
 }
 
+
+export async function createAccount(name, email, password) {
+  // VIRAJ: FIX THIS
+  console.log(password)
+  const data = {
+    "password": password,
+    "passwordConfirm": password,
+    "email": email,
+    "emailVisibility": true,
+    "verified": true,
+    "name": name
+  };
+  await pb.collection('viraj_users').create(data);
+  login(email, password)
+}
