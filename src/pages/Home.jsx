@@ -114,7 +114,7 @@ const Home = () => {
 
           {/* Register Form */}
           <div className="space-y-3">
-            <h2 className="text-lg font-bold">Create Account</h2>
+            <h2 className="text-lg font-bold">Create Account (Broken, bad Pocketbase Config)</h2>
             <input
               type="text"
               className="input input-bordered w-full"

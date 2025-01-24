@@ -5,10 +5,10 @@ const AllRoutes = () => {
     return (
         <>
             <Routes>
-                {/* Main (for General Public) */}
+                {/* Main */}
                 <Route path="/" element={<Home />} />
 
-                {/* Errors */}
+                {/* Errors - 404 */}
                 <Route path="*" element={<PageNotFound />} />
             </Routes>
         </>
