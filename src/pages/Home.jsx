@@ -1,145 +1,215 @@
 import { useEffect, useState } from "react";
-import { user, isUserLoggedIn, login, logout, createAccount, getAllNotes, deleteNote, updateNote, addNote } from "../lib/pocketbase"
-import MDEditor from '@uiw/react-md-editor';
+import {
+  user,
+  isUserLoggedIn,
+  login,
+  logout,
+  createAccount,
+  getAllNotes,
+  deleteNote,
+  updateNote,
+  addNote,
+} from "../lib/pocketbase";
+import MDEditor from "@uiw/react-md-editor";
 import { useFetchPocketbase } from "../hooks/useFetchPocketbase";
 
-
-
 const Home = () => {
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
-  const [userEmail, setUserEmail] = useState("")
-  const [userPassword, setUserPassword] = useState("")
+  const [registerName, setRegisterName] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
 
-  const [userCreateName, setUserCreateName] = useState("")
-  const [userCreateEmail, setUserCreateEmail] = useState("")
-  const [userCreatePassword, setUserCreatePassword] = useState("")
+  const [noteName, setNoteName] = useState("");
+  const [noteId, setNoteId] = useState("");
+  const [noteContent, setNoteContent] = useState("");
+  const [editorVisible, setEditorVisible] = useState(false);
 
-  const [currentNoteName, setCurrentNoteName] = useState("")
-  const [currentNoteId, setCurrentNoteId] = useState("")
-  const [currentNoteContents, setCurrentNotesContents] = useState("")
-  const [showEditor, setShowEditor] = useState(false)
+  const [newNoteName, setNewNoteName] = useState("");
 
-  const [makeNewNoteName, setMakeNewNoteName] = useState("")
-
-  const { data: allNotesList } = useFetchPocketbase(getAllNotes);
-
+  const { data: notesList } = useFetchPocketbase(getAllNotes);
 
   useEffect(() => {
-    document.title = `Notes app`
-  })
+    document.title = "Notes App";
+  }, []);
 
-  function handleLogin() {
-    login(userEmail, userPassword)
-  }
+  const handleLogin = () => login(loginEmail, loginPassword);
 
-  function handleCreateAccount() {
-    // BROKEN
-    createAccount(userCreateName, userCreateEmail, userCreatePassword)
-  }
+  const handleRegister = () =>
+    createAccount(registerName, registerEmail, registerPassword);
 
-  function handleNoteClick(note) {
-    setCurrentNotesContents(note.content);
-    setShowEditor(true);
-    setCurrentNoteId(note.id)
-    setCurrentNoteName(note.name)
-  }
+  const handleEditNote = (note) => {
+    setNoteContent(note.content);
+    setEditorVisible(true);
+    setNoteId(note.id);
+    setNoteName(note.name);
+  };
 
-  function handleForceCloseEditor() {
-    setShowEditor(false);
-    setCurrentNoteId("")
-    setCurrentNotesContents("")
-    setCurrentNoteName("")
-  }
+  const handleSaveNote = () => updateNote(noteId, noteName, noteContent);
 
-  function handleSave() {
-    updateNote(currentNoteId, currentNoteName, currentNoteContents)
-  }
+  const handleCloseEditor = () => {
+    setEditorVisible(false);
+    setNoteId("");
+    setNoteName("");
+    setNoteContent("");
+  };
 
-  function createNewNote() {
-    addNote(makeNewNoteName, "### New Note!")
-  }
+  const handleCreateNote = () => addNote(newNoteName, "### New Note");
 
   return (
-    <>
-      {/* top bar displaying basic info */}
-      <div className="flex flex-row gap-3 justify-between border-2 border-black">
-        <div className="">{isUserLoggedIn ?
-          (
-            <div className="">
-              <div className="font-bold text-xl">Logged in as: {user.record.name}</div>
-              <div className="italic">
-                Note:
-                <input type="text" className="input input-sm input-bordered ml-2" value={currentNoteName} onChange={(e) => setCurrentNoteName(e.target.value)} />
-              </div>
-            </div>
-          )
-
-          : "You are not logged in!"}</div>
-        {!isUserLoggedIn && (
-          <div className="grid grid-rows-4">
-            <div className="font-bold text-xl">Login</div>
-            <input type="email" className="input" placeholder="Enter your email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} />
-            <input type="text" className="input" placeholder="Enter your password" value={userPassword} onChange={(e) => setUserPassword(e.target.value)} />
-            <div className="btn" onClick={handleLogin}>Login</div>
+    <div className="p-4">
+      {/* Header Section */}
+      <div className="flex justify-between items-center border-b-2 pb-3 mb-4">
+        {isUserLoggedIn ? (
+          <div>
+            <h1 className="text-xl font-bold">Logged in as: {user.record.name}</h1>
+            {noteName && (
+              <p className="italic">
+                Note:{" "}
+                <input
+                  type="text"
+                  className="input input-sm input-bordered ml-2"
+                  value={noteName}
+                  onChange={(e) => setNoteName(e.target.value)}
+                  placeholder="Edit note name"
+                />
+              </p>
+            )}
           </div>
+        ) : (
+          <h1 className="text-xl font-bold">You are not logged in!</h1>
         )}
-        {!isUserLoggedIn && (
-          <div className="grid grid-rows-3">
-            <div className="font-bold text-xl">Create Account</div>
-            <input type="email" className="input" placeholder="Enter your name" value={userCreateName} onChange={(e) => setUserCreateName(e.target.value)} />
-            <input type="email" className="input" placeholder="Enter your email" value={userCreateEmail} onChange={(e) => setUserCreateEmail(e.target.value)} />
-            <input type="text" className="input" placeholder="Enter your password" value={userCreatePassword} onChange={(e) => setUserCreatePassword(e.target.value)} />
-            <div className="btn" onClick={handleCreateAccount}>Create Account</div>
-          </div>
-        )}
-        {showEditor && (
-          <>
-            <div className="btn btn-success" onClick={handleSave}>Save</div>
-            <div className="btn btn-error" onClick={handleForceCloseEditor}>Close</div>
-          </>
-        )}
-        {isUserLoggedIn ? <div className="btn" onClick={logout}>Logout</div> : ""}
+        {isUserLoggedIn ? (
+          <button className="btn btn-error" onClick={logout}>
+            Logout
+          </button>
+        ) : null}
       </div>
 
-      {/* is user is logged in */}
+      {/* Login or Register */}
+      {!isUserLoggedIn && (
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          {/* Login Form */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold">Login</h2>
+            <input
+              type="email"
+              className="input input-bordered w-full"
+              placeholder="Email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              className="input input-bordered w-full"
+              placeholder="Password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+            />
+            <button className="btn btn-primary w-full" onClick={handleLogin}>
+              Login
+            </button>
+          </div>
+
+          {/* Register Form */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold">Create Account</h2>
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              placeholder="Full Name"
+              value={registerName}
+              onChange={(e) => setRegisterName(e.target.value)}
+            />
+            <input
+              type="email"
+              className="input input-bordered w-full"
+              placeholder="Email"
+              value={registerEmail}
+              onChange={(e) => setRegisterEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              className="input input-bordered w-full"
+              placeholder="Password"
+              value={registerPassword}
+              onChange={(e) => setRegisterPassword(e.target.value)}
+            />
+            <button className="btn btn-primary w-full" onClick={handleRegister}>
+              Register
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Editor Section */}
+      {isUserLoggedIn && editorVisible && (
+        <div className="mb-4">
+          <MDEditor value={noteContent} onChange={setNoteContent} />
+          <div className="flex gap-3 mt-3">
+            <button className="btn btn-success" onClick={handleSaveNote}>
+              Save
+            </button>
+            <button className="btn btn-error" onClick={handleCloseEditor}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Notes Section */}
       {isUserLoggedIn && (
-        <div className="">
-          {showEditor && (
-            <div className="mt-3">
-              <MDEditor
-                value={currentNoteContents}
-                onChange={setCurrentNotesContents}
-              />
-              {/* <MDEditor.Markdown source={currentNoteContents} style={{ whiteSpace: 'pre-wrap' }} /> */}
+        <div>
+          <h2 className="text-xl font-bold mb-4">Your Notes</h2>
+          <div className="grid grid-cols-2 gap-6">
+            {/* Notes List */}
+            <div>
+              {notesList?.length > 0 ? (
+                notesList.map((note) => (
+                  <div
+                    key={note.id}
+                    className="flex justify-between items-center mb-2"
+                  >
+                    <span
+                      className={`cursor-pointer ${note.id === noteId && "font-bold"
+                        }`}
+                      onClick={() => handleEditNote(note)}
+                    >
+                      {note.name}
+                    </span>
+                    <button
+                      className="btn btn-sm btn-error"
+                      onClick={() => deleteNote(note.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p>No notes found.</p>
+              )}
             </div>
-          )}
-          <div className="mt-5">
-            <div className="flex flex-row justify-between">
-              <div className="">
-                {allNotesList?.length > 0 ? (
-                  allNotesList.map((note) => (
-                    <div key={note.id} className="flex flex-row gap-3">
-                      <div className={`text-lg ${note.id === currentNoteId && "font-bold"}`}>{note.name}</div>
-                      <div className="btn btn-sm btn-info" onClick={() => handleNoteClick(note)}>Edit</div>
-                      <div className="btn btn-sm btn-error" onClick={() => deleteNote(note.id)}>Delete</div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="">No notes found</div>
-                )}
-              </div>
-              <div className="border-2 border-black p-3 flex flex-col">
-                <div className="text-xl font-bold">New Note</div>
-                <input type="text" className="input input-bordered" placeholder="new note name" value={makeNewNoteName} onChange={(e) => setMakeNewNoteName(e.target.value)} />
-                <div className="btn" onClick={createNewNote}>Create</div>
-              </div>
+
+            {/* Create New Note */}
+            <div className="border-2 p-4">
+              <h3 className="text-lg font-bold mb-3">Create a New Note</h3>
+              <input
+                type="text"
+                className="input input-bordered w-full mb-2"
+                placeholder="Note Name"
+                value={newNoteName}
+                onChange={(e) => setNewNoteName(e.target.value)}
+              />
+              <button className="btn btn-primary w-full" onClick={handleCreateNote}>
+                Create Note
+              </button>
             </div>
           </div>
         </div>
-
       )}
-    </>
+    </div>
   );
 };
 
-export { Home }
+export { Home };
