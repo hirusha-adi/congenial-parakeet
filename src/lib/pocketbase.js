@@ -37,3 +37,8 @@ export async function createAccount(name, email, password) {
   await pb.collection('viraj_users').create(data);
   login(email, password)
 }
+
+export async function getAllNotes() {
+  const records = await pb.collection('viraj_todo').getFullList();
+  return records
+}
